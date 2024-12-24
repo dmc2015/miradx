@@ -3,6 +3,12 @@ class Action < ApplicationRecord
   has_many :commuter, through: :risk_analysis
 
   VALID_UNITS = %w[mile floor minute quantity].freeze
+  UNIT_MAPPING = {
+    "floor": 20,
+    "mile": 10,
+    "quantity": 1,
+    "minute": 5
+  }.freeze
 
   validates :action, presence: true
   validates :timestamp, presence: true

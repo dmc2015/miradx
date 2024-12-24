@@ -11,18 +11,20 @@ class RiskAnalysesController < ApplicationController
       end
     end
 
-    risk_analysis_results = actions.map do |action|
-      RiskAnalysis.create!(commuter: commuter, action: action)
+    risk_analysis_ids = actions.map do |action|
+      RiskAnalysis.create!(commuter: commuter, action: action).id
     end
 
-    # RiskAnalysis.create(risk_analysis_params)
-    # risk_analysis_results = RiskAnalyses::GenerateResults.new(risk_analysis)
-    # YOU MAPPED ABOVE SO YOU MIGHT NEED TO DO SOME CONFIGURATION
-    # Might want to consider token management, maybe redis
-    binding.pry
-    JSONParseService.new(risk_analysis_results, %i[commuterId risk])
+    risk_analyses = RiskAnalysis.where(id: risk_analysis_ids)
+                                .includes(:action, :commuter)
+
+    risk_analyses_mort_results = RiskCalculator::GenerateResults.call(risk_analyses)
+
+    risk_analysis_response = JsonParseService.parse(risk_analyses_mort_results, %i[commuter_id risk])
+
+    render json: risk_analysis_response
   end
-    
+
   private
 
   def valid_dates?
@@ -59,24 +61,23 @@ class RiskAnalysesController < ApplicationController
 end
 
 # input
-{
-  "commuterId": 'COM-123',
-  "actions": [
-    {
-      "timestamp": '2022-01-01 10:05:11',
-      "action": 'walked on sidewalk',
-      "unit": 'mile',
-      "quantity": 0.4
-    },
-    {
-      "timestamp": '2022-01-01 10:30:09',
-      "action": 'rode a shark',
-      "unit": 'minute',
-      "quantity": 3
-    }
-  ]
-}
-<<<<<<< HEAD
+# {
+#   "commuterId": 'COM-123',
+#   "actions": [
+#     {
+#       "timestamp": '2022-01-01 10:05:11',
+#       "action": 'walked on sidewalk',
+#       "unit": 'mile',
+#       "quantity": 0.4
+#     },
+#     {
+#       "timestamp": '2022-01-01 10:30:09',
+#       "action": 'rode a shark',
+#       "unit": 'minute',
+#       "quantity": 3
+#     }
+#   ]
+# }
 
 # output
 #
@@ -84,15 +85,3 @@ end
 # "commuterId": "COM-123",
 # "risk": 5500
 # }
-=======
-=end
-
-=begin
-output
-
-{
-"commuterId": "COM-123",
-"risk": 5500
-}
-=end
->>>>>>> dev
