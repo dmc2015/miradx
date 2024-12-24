@@ -22,7 +22,7 @@ class RiskAnalysesController < ApplicationController
     binding.pry
     JSONParseService.new(risk_analysis_results, %i[commuterId risk])
   end
-
+    
   private
 
   def valid_dates?
@@ -76,6 +76,7 @@ end
     }
   ]
 }
+<<<<<<< HEAD
 
 # output
 #
@@ -83,3 +84,15 @@ end
 # "commuterId": "COM-123",
 # "risk": 5500
 # }
+=======
+=end
+
+=begin
+output
+
+{
+"commuterId": "COM-123",
+"risk": 5500
+}
+=end
+>>>>>>> dev
