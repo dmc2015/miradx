@@ -1,8 +1,12 @@
 class RiskAnalysesController < ApplicationController
-  def create
-    
-  end
+  before_action :create, only: [:valid_dates?, :risk_analysis_params]
 
+  def create
+    risk_analyses = RiskAnalysis.create(risk_analysis_params)
+    risk_analysis_results = RiskAnalyses::GenerateResults.new(risk_analysis)
+    JSONParseService.new(risk_analysis_results, [:commuterId, :risk])
+  end
+    
   private
 
   def valid_dates?
@@ -34,10 +38,14 @@ class RiskAnalysesController < ApplicationController
       raise ActionController::ParameterMissing.new('unit') if action[:unit].blank?
       raise ActionController::ParameterMissing.new('quantity') if action[:quantity].blank?
     end
-  @risk_analysis_params =||  { commuterId: params[:commuterId], actions: actions }
+    @risk_analysis_params ||= { commuterId: params[:commuterId], actions: actions }
   end
+end
+
+
 
 =begin
+input
 {
 "commuterId": "COM-123",
 "actions": [
@@ -56,5 +64,12 @@ class RiskAnalysesController < ApplicationController
 ]
 }
 =end
-  end
-end
+
+=begin
+output
+
+{
+"commuterId": "COM-123",
+"risk": 5500
+}
+=end
