@@ -1,8 +1,8 @@
 services:
   - type: web
-    name: miradx-risk-analysis-api
+    name: miradx-risk-analysis-api-test
     runtime: ruby
-    buildCommand: "./bin/render-build.sh"
+    buildCommand: "echo 'Testing build command' && ./bin/render-build.sh"
     startCommand: "bundle exec rails server"
     envVars:
       - key: RAILS_MASTER_KEY
