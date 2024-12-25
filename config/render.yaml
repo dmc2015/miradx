@@ -19,5 +19,5 @@ services:
 databases:
   - name: miradx-risk-analysis-db
     databaseName: miradx_production
-    user: postgres
+    user: miradx_production_user
     plan: free

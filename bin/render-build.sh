@@ -1,4 +1,20 @@
 #!/usr/bin/env bash
+set -x  # Print each command before executing
+set -e  # Exit immediately if a command exits with a non-zero status
+
+bundle install || exit 1
+
+echo "RAILS_ENV: $RAILS_ENV"
+echo "DATABASE_URL: ${DATABASE_URL:=not set}"
+
+bundle exec rake assets:precompile || exit 1
+bundle exec rake assets:clean || exit 1
+
+RAILS_ENV=production bundle exec rails db:migrate || exit 1
+
+echo "========================================"
+
+
 
 echo "========================================"
 echo "Starting MiraDx Risk Analysis API build script"
