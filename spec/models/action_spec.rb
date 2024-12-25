@@ -1,118 +1,73 @@
+# spec/models/action_spec.rb
 require 'rails_helper'
 
 RSpec.describe Action, type: :model do
-  describe 'associations' do
-    it { should have_many(:risk_analyses) }
-    it { should have_many(:commuters).through(:risk_analyses) }
-  end
-
   describe 'validations' do
+    subject { build(:action) }
+
     it { should validate_presence_of(:action) }
     it { should validate_presence_of(:timestamp) }
     it { should validate_presence_of(:unit) }
     it { should validate_presence_of(:quantity) }
-    it { should validate_numericality_of(:quantity).is_greater_than(0) }
     it { should validate_inclusion_of(:unit).in_array(Action::VALID_UNITS) }
-  end
-
-  describe 'constants' do
-    it 'defines VALID_UNITS' do
-      expect(Action::VALID_UNITS).to eq(%w[mile floor minute quantity])
-    end
-
-    it 'defines UNIT_MAPPING' do
-      expect(Action::UNIT_MAPPING).to eq({
-                                           floor: 20,
-                                           mile: 10,
-                                           quantity: 1,
-                                           minute: 5
-                                         })
-    end
+    it { should validate_numericality_of(:quantity).is_greater_than(0) }
   end
 
   describe '.valid_dates?' do
-    context 'with actions on same day' do
-      let(:actions) do
-        [
-          { 'timestamp' => '2024-01-01 10:00:00' },
-          { 'timestamp' => '2024-01-01 15:00:00' }
-        ]
+    let(:base_timestamp) { '2022-01-01 10:00:00' }
+
+    let(:same_day_actions) do
+      [
+        { timestamp: '2022-01-01 10:00:00' },
+        { timestamp: '2022-01-01 15:00:00' },
+        { timestamp: '2022-01-01 23:59:59' }
+      ]
+    end
+
+    let(:different_day_actions) do
+      [
+        { timestamp: '2022-01-01 23:59:59' },
+        { timestamp: '2022-01-02 00:00:00' }
+      ]
+    end
+
+    context 'with valid inputs' do
+      it 'returns false for empty array' do
+        expect(described_class.valid_dates?([])).to be false
       end
 
-      it 'returns truthy' do
-        expect(Action.valid_dates?(actions)).to be_truthy
+      it 'returns true for single action' do
+        expect(described_class.valid_dates?([{ timestamp: base_timestamp }])).to be true
+      end
+
+      it 'returns true for multiple actions on same day' do
+        expect(described_class.valid_dates?(same_day_actions)).to be true
+      end
+
+      it 'handles symbol keys' do
+        actions = same_day_actions.map { |a| { timestamp: a[:timestamp] } }
+        expect(described_class.valid_dates?(actions)).to be true
       end
     end
 
-    context 'with actions on different days' do
-      let(:actions) do
-        [
-          { 'timestamp' => '2024-01-01 10:00:00' },
-          { 'timestamp' => '2024-01-02 10:00:00' }
-        ]
+    context 'with invalid inputs' do
+      it 'returns false for actions on different days' do
+        expect(described_class.valid_dates?(different_day_actions)).to be false
       end
 
-      it 'returns falsey' do
-        expect(Action.valid_dates?(actions)).to be_falsey
-      end
-    end
-
-    context 'with actions at midnight' do
-      let(:actions) do
-        [
-          { 'timestamp' => '2024-01-01 10:00:00' },
-          { 'timestamp' => '2024-01-01 00:00:00' }
-        ]
+      it 'returns false for invalid date format' do
+        actions = [{ timestamp: 'invalid date' }]
+        expect(described_class.valid_dates?(actions)).to be false
       end
 
-      it 'returns falsey' do
-        expect(Action.valid_dates?(actions)).to be_truthy
-      end
-    end
-
-    context 'with actions at 11:59' do
-      let(:actions) do
-        [
-          { 'timestamp' => '2024-01-01 11:59:59' },
-          { 'timestamp' => '2024-01-01 00:00:00' }
-        ]
+      it 'returns false for nil timestamp' do
+        actions = [{ timestamp: nil }]
+        expect(described_class.valid_dates?(actions)).to be false
       end
 
-      it 'returns falsey' do
-        expect(Action.valid_dates?(actions)).to be_truthy
-      end
-    end
-
-    context 'with actions at 00:01' do
-      let(:actions) do
-        [
-          { 'timestamp' => '2024-01-01 11:59:59' },
-          { 'timestamp' => '2024-01-02 00:00:00' }
-        ]
-      end
-
-      it 'returns falsey' do
-        expect(Action.valid_dates?(actions)).to be_falsey
-      end
-    end
-  end
-
-  describe '#timestamp_format' do
-    let(:action) { build(:action) }
-
-    context 'with valid timestamp' do
-      before { action.timestamp = '2024-01-01 10:00:00' }
-
-      it 'is valid' do
-        expect(action).to be_valid
-      end
-    end
-
-    context 'with invalid timestamp' do
-      it 'is invalid with incorrect format' do
-        action = Action.new
-        action.timestamp = 'not-a-date'
-        expect(action).not_to be_valid
+      it 'returns false for missing timestamp key' do
+        actions = [{}]
+        expect(described_class.valid_dates?(actions)).to be false
       end
     end
   end

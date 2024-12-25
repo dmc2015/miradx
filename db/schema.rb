@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -10,34 +12,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_22_192521) do
+ActiveRecord::Schema[7.0].define(version: 20_241_222_192_521) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension 'plpgsql'
 
-  create_table "actions", force: :cascade do |t|
-    t.datetime "timestamp"
-    t.string "unit"
-    t.decimal "quantity"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "action"
+  create_table 'actions', force: :cascade do |t|
+    t.datetime 'timestamp'
+    t.string 'unit'
+    t.decimal 'quantity'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.string 'action'
   end
 
-  create_table "commuters", force: :cascade do |t|
-    t.string "commuter_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+  create_table 'commuters', force: :cascade do |t|
+    t.string 'commuter_id'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
   end
 
-  create_table "risk_analyses", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "commuter_id", null: false
-    t.bigint "action_id", null: false
-    t.index ["action_id"], name: "index_risk_analyses_on_action_id"
-    t.index ["commuter_id"], name: "index_risk_analyses_on_commuter_id"
+  create_table 'risk_analyses', force: :cascade do |t|
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.bigint 'commuter_id', null: false
+    t.bigint 'action_id', null: false
+    t.index ['action_id'], name: 'index_risk_analyses_on_action_id'
+    t.index ['commuter_id'], name: 'index_risk_analyses_on_commuter_id'
   end
 
-  add_foreign_key "risk_analyses", "actions"
-  add_foreign_key "risk_analyses", "commuters"
+  add_foreign_key 'risk_analyses', 'actions'
+  add_foreign_key 'risk_analyses', 'commuters'
 end

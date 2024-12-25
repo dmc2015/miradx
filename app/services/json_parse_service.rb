@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class JsonParseService
   def self.parse(object, keys)
     camelize_keys(filter_keys(object, keys))
