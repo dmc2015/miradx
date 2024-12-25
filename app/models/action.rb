@@ -1,6 +1,6 @@
 class Action < ApplicationRecord
   has_many :risk_analyses
-  has_many :commuter, through: :risk_analysis
+  has_many :commuters, through: :risk_analyses
 
   VALID_UNITS = %w[mile floor minute quantity].freeze
   UNIT_MAPPING = {
@@ -15,17 +15,19 @@ class Action < ApplicationRecord
   validates :unit, presence: true, inclusion: { in: VALID_UNITS }
   validates :quantity, presence: true, numericality: { greater_than: 0 }
 
-  validate :timestamp_format
+  def self.valid_dates?(actions)
+    morning_action_day = nil
+    night_action_day = nil
 
-  private
+    actions.each do |action|
+      action_date = DateTime.strptime(action['timestamp'], '%Y-%m-%d %H:%M:%S')
+      if morning_action_day.nil?
+        morning_action_day = action_date.midnight
+        night_action_day = action_date.tomorrow.midnight - 1.minute
+        next
+      end
 
-  def timestamp_format
-    return if timestamp.blank?
-
-    begin
-      DateTime.parse(timestamp.to_s)
-    rescue ArgumentError
-      errors.add(:timestamp, 'must be a valid datetime format (YYYY-MM-DD HH:MM:SS)')
+      return morning_action_day <= action_date && night_action_day >= action_date
     end
   end
 end

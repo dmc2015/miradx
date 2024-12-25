@@ -1,9 +1,4 @@
 Rails.application.routes.draw do
-  resources :actions
-  resources :commuters
-  resources :risk_analyses
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Defines the root path route ("/")
-  # root "articles#index"
+  resources :risk_analyses, only: [:create]
+  root 'rails/welcome#index'
 end
