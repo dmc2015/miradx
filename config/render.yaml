@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: miradx-risk-analysis-api
+    runtime: ruby
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec rails server"
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: miradx-risk-analysis-db
+          property: connectionString
+      - key: RAILS_ENV
+        value: production
+      - key: WEB_CONCURRENCY
+        value: 2
+
+databases:
+  - name: miradx-risk-analysis-db
+    databaseName: miradx_production
+    user: postgres
+    plan: free
