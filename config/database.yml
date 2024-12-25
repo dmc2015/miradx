@@ -6,7 +6,6 @@ default: &default
 development:
   <<: *default
   database: miradx_development
-i 
 test:
   <<: *default
   database: miradx_test
