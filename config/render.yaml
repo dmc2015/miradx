@@ -2,8 +2,8 @@ services:
   - type: web
     name: miradx-risk-analysis-api-test
     runtime: ruby
-    buildCommand: "echo 'Testing build command' && ./bin/render-build.sh"
-    startCommand: "bundle exec rails server"
+    buildCommand: "./bin/render-build.sh"
+    startCommand: bundle exec rails server"
     envVars:
       - key: RAILS_MASTER_KEY
         sync: false
@@ -15,6 +15,8 @@ services:
         value: production
       - key: WEB_CONCURRENCY
         value: 2
+      - key: RAILS_ENV
+        value: production
 
 databases:
   - name: miradx-risk-analysis-db
