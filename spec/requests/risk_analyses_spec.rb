@@ -1,4 +1,5 @@
-# spec/requests/risk_analyses_spec.rb
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'RiskAnalyses', type: :request do
@@ -87,7 +88,7 @@ RSpec.describe 'RiskAnalyses', type: :request do
     context 'with invalid parameters' do
       it 'handles missing commuterId' do
         post '/risk_analyses', params: base_payload.except(:commuterId)
-        expect(response).to have_http_status(:bad_request) # 400
+        expect(response).to have_http_status(:bad_request)
       end
 
       it 'handles missing actions array' do
@@ -147,7 +148,7 @@ RSpec.describe 'RiskAnalyses', type: :request do
 
           post '/risk_analyses', params: payload
 
-          expect(response).to have_http_status(:bad_request)
+          expect(response).to have_http_status(:unprocessable_entity)
         end
 
         it 'handles negative quantity' do

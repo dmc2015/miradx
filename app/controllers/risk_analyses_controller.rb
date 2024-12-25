@@ -1,51 +1,45 @@
+# frozen_string_literal: true
+
 class RiskAnalysesController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :valid_dates?, only: [:create]
 
   def create
-    commuter = Commuter.find_or_create_by!(commuter_id: risk_analysis_params[:commuter_id])
-
-    actions = Action.transaction do
-      risk_analysis_params[:actions].map do |action_params|
-        Action.create!(action_params)
-      end
-    end
-
-    risk_analysis_ids = actions.map do |action|
-      RiskAnalysis.create!(commuter: commuter, action: action).id
-    end
-
-    risk_analyses = RiskAnalysis.where(id: risk_analysis_ids)
-                                .includes(:action, :commuter)
-
-    risk_analyses_mort_results = RiskCalculator::GenerateResults.call(risk_analyses)
-
-    risk_analysis_response = JsonParseService.parse(risk_analyses_mort_results, %i[commuter_id risk])
-    render json: risk_analysis_response
+    result = CreateRiskAnalysis.new(risk_analysis_params).execute
+    render json: JsonParseService.parse(result, %i[commuter_id risk])
   end
 
   private
 
-  def valid_dates?
-    return if Action.valid_dates?(risk_analysis_params[:actions])
-
-    render json: { error: 'all timestamps must be on the same day' }, status: :unprocessable_entity
+  def risk_analysis_params
+    @risk_analysis_params ||= begin
+      validate_required_parameters
+      format_parameters
+    end
   end
 
-  def risk_analysis_params
-    return @risk_analysis_params if @risk_analysis_params
-
+  def validate_required_parameters
     params.require(:commuterId)
-    actions = params.require(:actions).map do |action|
-      action.permit(:timestamp, :action, :unit, :quantity)
-    end
+    params.require(:actions)
+  end
 
-    actions.each do |action|
-      raise ActionController::ParameterMissing.new('timestamp') if action[:timestamp].blank?
-      raise ActionController::ParameterMissing.new('action') if action[:action].blank?
-      raise ActionController::ParameterMissing.new('unit') if action[:unit].blank?
-      raise ActionController::ParameterMissing.new('quantity') if action[:quantity].blank?
+  def format_parameters
+    {
+      commuter_id: params[:commuterId],
+      actions: format_actions
+    }
+  end
+
+  def format_actions
+    params[:actions].map do |action|
+      formatted_action = action.permit(:timestamp, :action, :unit, :quantity)
+      validate_action_parameters(formatted_action)
+      formatted_action
     end
-    @risk_analysis_params ||= { commuter_id: params[:commuterId], actions: actions }
+  end
+
+  def validate_action_parameters(action)
+    %i[timestamp action unit quantity].each do |param|
+      raise ActionController::ParameterMissing, param if action[param].blank?
+    end
   end
 end

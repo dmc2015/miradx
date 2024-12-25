@@ -1,18 +1,45 @@
 module RiskCalculator
   class GenerateResults < ApplicationService
+    BASE_RISK_MULTIPLIER = 250
+
     def initialize(risk_analyses)
-      @risk_analyses = risk_analyses # Store param in instance variable
+      @risk_analyses = risk_analyses
+      @commuter_id = risk_analyses.first&.commuter&.commuter_id
     end
 
     def call
+      return empty_result if @risk_analyses.empty?
 
-      micromorts_score = @risk_analyses.map do |risk_analysis|
-        quantity = risk_analysis.action.quantity.to_f
-        unit = Action::UNIT_MAPPING[risk_analysis.action.unit.to_sym]
-        quantity * unit * 250
-      end.sum.to_i
+      {
+        commuter_id: @commuter_id,
+        risk: calculate_total_risk
+      }
+    end
 
-      { commuter_id: @risk_analyses.first.commuter.commuter_id, risk: micromorts_score }
+    private
+
+    def calculate_total_risk
+      @risk_analyses.sum { |analysis| calculate_individual_risk(analysis) }.to_i
+    end
+
+    def calculate_individual_risk(risk_analysis)
+      quantity = risk_analysis.action.quantity.to_f
+      unit_multiplier = fetch_unit_multiplier(risk_analysis.action.unit)
+
+      quantity * unit_multiplier * BASE_RISK_MULTIPLIER
+    end
+
+    def fetch_unit_multiplier(unit)
+      Action::UNIT_MAPPING.fetch(unit.to_sym) do
+        raise ArgumentError, "Invalid unit: #{unit}"
+      end
+    end
+
+    def empty_result
+      {
+        commuter_id: nil,
+        risk: 0
+      }
     end
   end
 end

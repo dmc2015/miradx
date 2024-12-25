@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :risk_analysis, aliases: [:commuter_action] do
     association :commuter

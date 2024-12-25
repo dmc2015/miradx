@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Commuter < ApplicationRecord
   has_many :risk_analyses
   has_many :actions, through: :risk_analyses

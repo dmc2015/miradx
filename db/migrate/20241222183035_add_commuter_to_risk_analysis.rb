@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddCommuterToRiskAnalysis < ActiveRecord::Migration[7.0]
   def change
     add_reference :risk_analyses, :commuter, null: false, foreign_key: true

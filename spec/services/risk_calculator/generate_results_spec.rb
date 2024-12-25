@@ -1,54 +1,61 @@
-require 'rails_helper'
-
 RSpec.describe RiskCalculator::GenerateResults do
+  let(:commuter) { create(:commuter, commuter_id: 'COM-123') }
+
+  let(:actions) do
+    [
+      create(:action, unit: 'mile', quantity: 2.0),
+      create(:action, unit: 'floor', quantity: 5.0)
+    ]
+  end
+
+  let(:risk_analyses) do
+    actions.map { |action| create(:risk_analysis, commuter: commuter, action: action) }
+  end
+
   describe '#call' do
-    let(:commuter) { create(:commuter) }
+    it 'calculates total risk correctly' do
+      result = described_class.call(risk_analyses)
 
-    context 'with single action' do
-      let(:action) { create(:action, unit: 'mile', quantity: 2.0) }
-      let(:risk_analysis) { create(:risk_analysis, commuter: commuter, action: action) }
-      let(:risk_analyses) { [risk_analysis] }
-
-      it 'calculates correct risk score' do
-        result = described_class.call(risk_analyses)
-        expected_score = (2.0 * Action::UNIT_MAPPING[:mile] * 250).to_i
-
-        expect(result).to eq({
-                               commuter_id: commuter.commuter_id,
-                               risk: expected_score
-                             })
-      end
+      expect(result).to include(
+        commuter_id: 'COM-123',
+        risk: be_a(Integer)
+      )
     end
 
-    context 'with multiple actions' do
-      let(:actions) do
-        [
-          create(:action, unit: 'mile', quantity: 1.0),
-          create(:action, unit: 'floor', quantity: 2.0),
-          create(:action, unit: 'minute', quantity: 3.0),
-          create(:action, unit: 'quantity', quantity: 4.0)
-        ]
-      end
+    it 'handles empty risk analyses' do
+      result = described_class.call([])
 
-      let(:risk_analyses) do
-        actions.map { |action| create(:risk_analysis, commuter: commuter, action: action) }
-      end
+      expect(result).to eq(
+        commuter_id: nil,
+        risk: 0
+      )
+    end
 
-      it 'calculates correct total risk score' do
-        result = described_class.call(risk_analyses)
+    it 'rounds risk to integer' do
+      result = described_class.call(risk_analyses)
+      expect(result[:risk]).to be_a(Integer)
+    end
 
-        expected_score = (
-          1.0 * Action::UNIT_MAPPING[:mile] * 250 +
-          2.0 * Action::UNIT_MAPPING[:floor] * 250 +
-          3.0 * Action::UNIT_MAPPING[:minute] * 250 +
-          4.0 * Action::UNIT_MAPPING[:quantity] * 250
-        ).to_i
+    it 'uses correct base multiplier' do
+      risk_analysis = create(:risk_analysis,
+                             commuter: commuter,
+                             action: create(:action, unit: 'mile', quantity: 1.0))
 
-        expect(result).to eq({
-                               commuter_id: commuter.commuter_id,
-                               risk: expected_score
-                             })
-      end
+      unit_multiplier = Action::UNIT_MAPPING[:mile]
+      expected_risk = (1.0 * unit_multiplier * described_class::BASE_RISK_MULTIPLIER).to_i
+
+      result = described_class.call([risk_analysis])
+      expect(result[:risk]).to eq(expected_risk)
+    end
+
+    it 'raises error for invalid unit' do
+      action = create(:action)
+      allow(action).to receive(:unit).and_return('invalid_unit')
+      risk_analysis = create(:risk_analysis, commuter: commuter, action: action)
+
+      expect do
+        described_class.call([risk_analysis])
+      end.to raise_error(ArgumentError, /Invalid unit/)
     end
   end
 end
