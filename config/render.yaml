@@ -9,7 +9,7 @@ services:
         sync: false
       - key: DATABASE_URL
         fromDatabase:
-          name: miradx-risk-analysis-db
+          name: miradx_production
           property: connectionString
       - key: RAILS_ENV
         value: production
