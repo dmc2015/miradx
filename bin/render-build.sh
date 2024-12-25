@@ -28,10 +28,12 @@ echo "DATABASE_URL status: $(if [ -z "$DATABASE_URL" ]; then echo "NOT SET"; els
 echo "RAILS_ENV is: $RAILS_ENV"
 
 echo "----------------------------------------"
-echo "Starting database preparation..."
-echo "Running db:prepare..."
-RAILS_ENV=production bundle exec rails db:prepare
-echo "Database preparation completed"
+echo "Starting database setup..."
+echo "Creating database..."
+RAILS_ENV=production bundle exec rails db:create
+echo "Running migrations..."
+RAILS_ENV=production bundle exec rails db:migrate
+echo "Database setup completed"
 
 echo "========================================"
 echo "Build script completed"
