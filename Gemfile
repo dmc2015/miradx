@@ -56,6 +56,7 @@ group :development, :test do
   # gem 'coverage'
   gem 'debug', platforms: %i[mri mingw x64_mingw]
   gem 'factory_bot_rails'
+  gem 'mutex_m'
   gem 'pry-byebug'
   gem 'rspec-rails'
   gem 'rubocop'
