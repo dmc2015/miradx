@@ -48,15 +48,21 @@ jobs:
           bundle exec rails db:create
           bundle exec rails db:schema:load
 
-      - name: Run tests
+      - name: Run tests with coverage
         env:
           RAILS_ENV: test
+          COVERAGE: true
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/miradx_test
-        run: bundle exec rspec
+        run: |
+          bundle exec rspec
+          if [ ! -f coverage/.resultset.json ]; then
+            echo "Coverage results not generated!"
+            exit 1
+          fi
 
-      - name: Upload test results
+      - name: Upload coverage results
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: test-results
+          name: coverage-report
           path: coverage
