@@ -269,3 +269,7 @@ The application is designed to be deployed on any Ruby-compatible hosting platfo
 - Ruby 3.3.0 runtime
 - PostgreSQL database
 - Environment variables for database configuration
+- GitHub Actions workflow for CI running RSpec tests on PRs
+- Required status checks configured to ensure tests pass before merging to main
+
+- Currently deployed on Render at <https://miradx-api.onrender.com/>
