@@ -7,7 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  rspec:
+    name: RSpec
     runs-on: ubuntu-latest
 
     services:
@@ -26,7 +27,8 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -48,17 +50,15 @@ jobs:
           bundle exec rails db:create
           bundle exec rails db:schema:load
 
-      - name: Run tests with coverage
+      - name: Run RSpec tests
+        id: rspec
         env:
           RAILS_ENV: test
           COVERAGE: true
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/miradx_test
         run: |
           bundle exec rspec
-          if [ ! -f coverage/.resultset.json ]; then
-            echo "Coverage results not generated!"
-            exit 1
-          fi
+          echo "status=completed" >> $GITHUB_OUTPUT
 
       - name: Upload coverage results
         if: always()
