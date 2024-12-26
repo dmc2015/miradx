@@ -9,6 +9,7 @@ The API is deployed and ready for testing at:
 ```
 https://miradx-api.onrender.com/
 ```
+**Note: if the server is inactive it might take a minute for it to respond to requests**
 
 While the site shows a Rails default view, the POST endpoint is active. Test with:
 
