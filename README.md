@@ -10,8 +10,6 @@ The API is deployed and ready for testing at:
 https://miradx-api.onrender.com/
 ```
 
-**Note: there maybe a delay in response as the server spins up from inactivity**
-
 While the site shows a Rails default view, the POST endpoint is active. Test with:
 
 ```bash
@@ -226,6 +224,14 @@ UNIT_MAPPING = {
 
 BASE_RISK_MULTIPLIER = 250
 ```
+
+## CI/CD
+
+The project includes automated testing via GitHub Actions. On every pull request and push to main:
+
+- Runs full RSpec test suite
+- Uses PostgreSQL 14 for test database
+- Generates and uploads test coverage reports
 
 ## Testing Highlights
 
