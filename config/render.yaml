@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: miradx-risk-analysis-api-test
+    name: miradx_api
     runtime: ruby
     buildCommand: "./bin/render-build.sh"
     startCommand: bundle exec rails server"
@@ -19,7 +19,7 @@ services:
         value: production
 
 databases:
-  - name: miradx-risk-analysis-db
-    databaseName: miradx_production
+  - name: miradx_production
+    databaseName: miradx_production_tlo1
     user: miradx_production_user
     plan: free
