@@ -70,5 +70,26 @@ RSpec.describe Action, type: :model do
         expect(described_class.valid_dates?(actions)).to be false
       end
     end
+
+    context 'with invalid date format' do
+      it 'rescues parsing errors and returns false' do
+        invalid_actions = [
+          { timestamp: '2022-13-45 25:99:99' }
+        ]
+
+        expect(Rails.logger).to receive(:error).with(/Date parsing error in valid_dates?/)
+        expect(described_class.valid_dates?(invalid_actions)).to be false
+      end
+
+      it 'handles nil timestamp in subsequent actions' do
+        actions = [
+          { timestamp: '2022-01-01 10:00:00' },
+          { timestamp: nil }
+        ]
+
+        expect(Rails.logger).to receive(:error).with(/Date parsing error in valid_dates?/)
+        expect(described_class.valid_dates?(actions)).to be false
+      end
+    end
   end
 end
