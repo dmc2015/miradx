@@ -33,7 +33,7 @@ class Action < ApplicationRecord
 
       current_date.between?(day_start, day_end)
     end
-  rescue ArgumentError, TypeError => e
+  rescue ArgumentError, TypeError, NoMethodError => e
     Rails.logger.error("Date parsing error in valid_dates?: #{e.message}")
     false
   end
@@ -43,7 +43,5 @@ class Action < ApplicationRecord
     return nil if time_stamp.nil?
 
     DateTime.strptime(time_stamp, '%Y-%m-%d %H:%M:%S')
-  rescue ArgumentError, TypeError
-    nil
   end
 end
